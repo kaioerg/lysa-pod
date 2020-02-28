@@ -8,9 +8,12 @@ from math import pi, sin, cos, radians, atan2, atan, sqrt, degrees
 class Imu():
     '''
     Classe principal da IMU
-    Modelo da IMU: MPU9250
-    Controlador: Beaglebone Black
+
+
+    Modelo da IMU: MPU9250 (https://www.sparkfun.com/products/13762)
+    Controlador: Beaglebone Black REV-C (https://www.sparkfun.com/products/12857)
     Biblioteca utilizada na IMU: https://github.com/jefmenegazzo/MPU9250
+
     '''
 
     def __init__(self):
@@ -28,7 +31,9 @@ class Imu():
         mfs=AK8963_BIT_16, 
         mode=AK8963_MODE_C100HZ)
 
-        self.mpu.configure() # Apply the settings to the registers.
+        self.mpu.configure()
+
+        '''Iniciando variáveis'''
 
         self.accel = 0
         self.gyro = 0
