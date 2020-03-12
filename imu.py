@@ -56,7 +56,7 @@ class Imu():
         '''
         self.accel = self.mpu.readAccelerometerMaster()
         self.gyro = self.mpu.readGyroscopeMaster()
-        self. mag = self.mpu.readMagnetometerMaster()
+        self.mag = self.mpu.readMagnetometerMaster()
         self.temp = self.mpu.readTemperatureMaster()
 
     def readAcellRaw(self):
@@ -169,3 +169,60 @@ class Imu():
         Calcula o valor do roll atual em radiano
         '''
         return self.read_y_rotation(self.accel[0], self.accel[1], self.accel[2])
+
+if __name__ == "__main__":
+    imu = Imu()
+
+    print("iniciando processo de calibração......")
+    print("certifique-se que a imu está alinhada com e paralela ao chão (apenas o z deve apresentar 1g)")
+    print(" ")
+    print(" ")
+    time.sleep(3)
+    imu.mpu.reset() # Reset sensors
+    imu.mpu.configure() # After resetting you need to reconfigure the sensors
+    accelbias = {"x": 0, "y": 0, "z": 0}
+    gyrobias = {"x": 0, "y": 0, "z": 0}
+    
+
+    '''while True:
+        accel = imu.mpu.readAccelerometerMaster()
+        print("x: {:.2f} y: {:.2f} z: {:.2f}".format(accel[0], accel[1], accel[2]))'''
+
+    for x in range(0, 100):
+        imu.mpu.calibrateMPU6500()
+        accelbias["x"] += imu.mpu.abias[0]
+        accelbias["y"] += imu.mpu.abias[1]
+        accelbias["z"] += imu.mpu.abias[2]
+
+        gyrobias["x"] += imu.mpu.gbias[0]
+        gyrobias["y"] += imu.mpu.gbias[1]
+        gyrobias["z"] += imu.mpu.gbias[2]
+
+        print(x)
+
+    print(" ")
+    print(" ")
+    print("accel: ")
+    print(accelbias)
+    print("gyro: ")
+    print(gyrobias)
+    print(" ")
+    print(" ")
+
+    accel_x = accelbias["x"]  / 100
+    accel_y = accelbias["y"]  / 100
+    accel_z = accelbias["z"]  / 100
+
+    gyro_x = gyrobias["x"]  / 100
+    gyro_y = gyrobias["y"]  / 100
+    gyro_z = gyrobias["z"]  / 100
+
+    print("dividindo.....")
+    print("accel: ")
+    print(accel_x, accel_y, accel_z)
+    print("gyro: ")
+    print(gyro_x, gyro_y, gyro_z)
+
+
+
+quit()

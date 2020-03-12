@@ -18,6 +18,7 @@
 
 import warnings
 import numpy as np
+import time
 from numpy.linalg import norm
 from quaternion import Quaternion
 from mpu9250_jmdev.registers import *
@@ -26,7 +27,7 @@ from math import pi, sin, cos, radians, atan2, atan, sqrt, degrees
 
 
 class MadgwickAHRS:
-    samplePeriod = 1/256
+    samplePeriod = 1/100
     quaternion = Quaternion(1, 0, 0, 0)
     beta = 1
 
@@ -49,7 +50,7 @@ class MadgwickAHRS:
         address_ak=AK8963_ADDRESS, 
         address_mpu_master=MPU9050_ADDRESS_68, # In 0x68 Address
         address_mpu_slave=None, 
-        bus=2, 
+        bus=2,
         gfs=GFS_1000, 
         afs=AFS_8G, 
         mfs=AK8963_BIT_16, 
@@ -75,8 +76,12 @@ class MadgwickAHRS:
         :return:
         """
         q = self.quaternion
-
+        
         gyroscope = np.array(gyroscope, dtype=float).flatten()
+       
+        # converter para rad/s pois o calculo eh feito nessa unidade
+        gyroscope = gyroscope * (pi / 180)
+        
         accelerometer = np.array(accelerometer, dtype=float).flatten()
         magnetometer = np.array(magnetometer, dtype=float).flatten()
 
@@ -131,6 +136,9 @@ class MadgwickAHRS:
         q = self.quaternion
 
         gyroscope = np.array(gyroscope, dtype=float).flatten()
+        # converter para rad/s pois o calculo eh feito nessa unidade
+        gyroscope = gyroscope * (pi / 180)
+
         accelerometer = np.array(accelerometer, dtype=float).flatten()
 
         # Normalise accelerometer measurement
@@ -166,13 +174,18 @@ if __name__ == "__main__":
 
     '''Valores encontrados pelo método de calibração tanto do gyro quanto do magnetômetro'''
 
-    mag.mpu.abias = [-0.011329287574404762, -0.25330171130952384, 0.03651064918154767]
-    mag.mpu.gbias = [-0.6061735607328869, -0.10081699916294642, -1.4063517252604167]
-    mag.mpu.magScale = [0.8609986504723346, 0.7595238095238095, 1.9159159159159158]
-    mag.mpu.mbias = [3.2831358745421246, 1.419734432234432, 7.121807272588523]
+    mag.mpu.abias = [0.10616856308072009, 0.0722536441036495, -0.07520403393469623]
+    mag.mpu.gbias = [-1.8274395861830581, 0.16646346425622466, 0.18989022462071722]
+    #mag.mpu.magScale = [0.8609986504723346, 0.7595238095238095, 1.9159159159159158]
+    #mag.mpu.mbias = [3.2831358745421246, 1.419734432234432, 7.121807272588523]
+    mag.mpu.configure()
+    print("valores calibrados....")
+
 
     while True:
         mag.update(mag.mpu.readGyroscopeMaster(), mag.mpu.readAccelerometerMaster(), mag.mpu.readMagnetometerMaster())
-        print("x: {:.2f} y: {:.2f} z: {:.2f}".format(mag.quaternion.to_euler123()[0], mag.quaternion.to_euler123()[1], mag.quaternion.to_euler123()[2])) 
-
-
+        ahrs = mag.quaternion.to_euler_angles()
+        roll = ahrs[0]
+        pitch = ahrs[1]
+        yaw = ahrs[2] 
+        print("roll: {:.2f} pitch: {:.2f} yaw: {:.2f}".format(roll, pitch, yaw))

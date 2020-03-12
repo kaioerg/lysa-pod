@@ -91,24 +91,19 @@ class Quaternion:
         else:
             roll = np.arctan2(2 * self[0] * self[1] - 2 * self[2] * self[3], 1 - 2 * self[1] ** 2 - 2 * self[3] ** 2)
             yaw = np.arctan2(2 * self[0] * self[2] - 2 * self[1] * self[3], 1 - 2 * self[2] ** 2 - 2 * self[3] ** 2)
-        return roll, pitch, yaw
+
+        if yaw < 0:
+            yaw += (2*pi)
+       
+        return roll * (180/pi), pitch * (180/pi), yaw * (180/pi)
 
     def to_euler123(self):
         roll = np.arctan2(-2*(self[2]*self[3] - self[0]*self[1]), self[0]**2 - self[1]**2 - self[2]**2 + self[3]**2)
         pitch = np.arcsin(2*(self[1]*self[3] + self[0]*self[1]))
         yaw = np.arctan2(-2*(self[1]*self[2] - self[0]*self[3]), self[0]**2 + self[1]**2 - self[2]**2 - self[3]**2)
-        
-        if roll < 0:
-            roll += (2*pi)
-        
-        if pitch < 0:
-            pitch += (2*pi)
 
         if yaw < 0:
             yaw += (2*pi)
-        
-        
-        
         
         return roll * (180/pi), pitch * (180/pi), yaw * (180/pi)
 
